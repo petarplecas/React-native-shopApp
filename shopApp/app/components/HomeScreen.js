@@ -1,12 +1,13 @@
 import React from 'react';
-import { Button, View, FlatList, Text, TouchableOpacity } from 'react-native';
+import { FlatList, Text, TouchableOpacity, ScrollView } from 'react-native';
 import Drawer from 'react-native-drawer';
 import Menu from '../menuScreens/Menu';
 import drawerStyles from '../assets/css/Main';
 import styles from '../assets/css/Main'
-import { Header, SearchBar, Icon } from 'react-native-elements';
+import { Header } from 'react-native-elements';
+import TabNavigator from 'react-native-tab-navigator';
 import { connect } from 'react-redux';
-import {  } from '../actions/mobileAction';
+import { getMobiles } from '../actions/mobileAction';
 
   class HomeScreen extends React.Component {
     static navigationOptions = {
@@ -14,6 +15,13 @@ import {  } from '../actions/mobileAction';
       // drawerLabel: 'Home'
     };
 
+    constructor(props) {
+      super(props);
+      this.state = {
+        selectedTab: 'list',
+    };
+
+    }
     closeControlPanel = () => {
       this._drawer.close()
     };
@@ -23,9 +31,18 @@ import {  } from '../actions/mobileAction';
     };
 
     _renderItem = ({ item }) => {
-      console.log(item)
       return (
-          <TouchableOpacity key={item.key}>
+          <TouchableOpacity 
+            style={{marginBottom: 5}}
+            key={item.key} 
+            onPress={() => (
+              this.props.navigation.push('Details', {
+                mobile: item
+                })
+              )
+            }
+            title="Go to details"
+          >
             <Text>Name: {item.name}</Text>
             <Text>Description: {item.description}</Text>
             <Text>model: {item.model}</Text>
@@ -34,6 +51,7 @@ import {  } from '../actions/mobileAction';
     };
   
     render() {
+      this.props.onLoadMobiles();
       return (
         <Drawer
           ref={(ref) => this._drawer = ref}
@@ -46,32 +64,35 @@ import {  } from '../actions/mobileAction';
           styles={drawerStyles}
           tweenHandler={(ratio) => ({ main: { opacity: (2 - ratio) / 2 } })} >
           <Header
-              leftComponent={{ icon: 'bars', color: '#fff', onPress: () => this.openControlPanel(), }}
+              leftComponent={{ icon: 'menu', color: '#fff', size: 30, onPress: () => this.openControlPanel(), }}
+              rightComponent={{ icon: 'add-circle', color: '#fff', size: 30, onPress: () => this.props.navigation.navigate('AddMobile') }}
               
               outerContainerStyles={{
-                  backgroundColor: '#de4b39',
+                  backgroundColor: 'rgb(100,130,44)',
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   height: 57,
               }}
           />
-          
-          <View>
-            <Button
-              onPress={() => this.props.navigation.navigate('Details')}
-              title="Go to details"
-            />
-            <Button
-              onPress={() => this.props.navigation.navigate('AddMobile')}
-              title="Add mobile"
-            />
-            <FlatList
-              style={styles.listContainer}
-              data={this.props.mobiles}
-              renderItem={this._renderItem}
-            />
-          </View>
+          <TabNavigator tabBarStyle={styles.tabBar}
+            style={{ marginBottom: -50 }}>
+            <TabNavigator.Item
+                selected={this.state.selectedTab === 'list'}
+                tabStyle={{ borderBottomWidth: this.state.selectedTab === 'list' ? 1 : 0, borderBottomColor: this.state.selectedTab === 'list' ? "white" : '#de4b39' }}
+                title="List of mobiles"
+                selectedTitleStyle={{ color: '#fff'}}
+                titleStyle={{ color: '#fff', fontSize: 16, justifyContent: 'center' }}
+                onPress={() => this.setState({ selectedTab: 'list' })}>
+                <ScrollView style={styles.mainContainer}>
+                  <FlatList
+                    style={styles.listContainer}
+                    data={this.props.mobiles}
+                    renderItem={this._renderItem}
+                  />
+                </ScrollView>
+            </TabNavigator.Item>
+          </TabNavigator>
         </Drawer>
       )
     }
@@ -84,16 +105,13 @@ import {  } from '../actions/mobileAction';
   }
 
   mapDispatchToProps = (dispatch) => {
-    return {}
+    return {
+      onLoadMobiles: () => dispatch(getMobiles())
+    }
   }
 
   export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
 
-//   const styles = StyleSheet.create({
-//     listContainer: {
-//       width: "100%"
-//   }
-// });
 
 // centerComponent={
 //   <View style={styles.searchHeader}>

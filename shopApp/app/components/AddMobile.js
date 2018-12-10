@@ -1,8 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { View, StyleSheet, ToastAndroid } from 'react-native';
-import { FormInput, Button } from 'react-native-elements';
-import { addMobile, setMobilePropertyInReducer } from '../actions/mobileAction';
+import { View, StyleSheet, ToastAndroid, ScrollView, Text } from 'react-native';
+import { Button } from 'react-native-elements';
+import { addMobile } from '../actions/mobileAction';
+
+import MobileInput from './TextInput/mobileInput'
+import validate from "../Utility/validation";
 
   class AddMobile extends React.Component {
     static navigationOptions = {
@@ -14,83 +17,156 @@ import { addMobile, setMobilePropertyInReducer } from '../actions/mobileAction';
       //   />
       // ),
     };
-    // constructor() {
-    //   super();
-    //   this.state = {
-    //   };
 
-    //   // this.submitForm = this.submitForm.bind(this);
-    // }
+    state = {
+      mobiles: {
+        name: {
+          value: "",
+          valid: false,
+          touched: false,
+          placeholder: "Mobile name",
+          validationRules: {
+            notEmpty: true
+          }
+        },
+        description: {
+          value: "",
+          valid: false,
+          touched: false,
+          placeholder: "Mobile description",
+          validationRules: {
+            notEmpty: true
+          }
+        },
+        model: {
+          value: "",
+          valid: false,
+          touched: false,
+          placeholder: "Mobile model",
+          validationRules: {
+            notEmpty: true
+          }
+        }
+      }
+    };
 
-    handleTextChange = (name, value) => {
-      this.props.setMobilePropertyInReducer(name, value);
-    }
+    mobileNameChangedHandler = val => {
+      this.setState(prevState => {
+        return {
+          mobiles: {
+            ...prevState.mobiles,
+            name: {
+              ...prevState.mobiles.name,
+              value: val,
+              valid: validate(val, prevState.mobiles.name.validationRules),
+              touched: true
+            }
+          }
+        };
+      });
+    };
 
-    submitForm = () => {
-      if (this.props.mobile.name &&
-          this.props.mobile.description &&
-          this.props.mobile.model) {
-            this.props.addMobile(this.props.mobile);
-            // this.handleTextChange(name, ''),
-            // this.handleTextChange(description, ''),
-            // this.handleTextChange(model, '')
-    }
-    else {
+    mobileDescriptionChangedHandler = val => {
+      this.setState(prevState => {
+        return {
+          mobiles: {
+            ...prevState.mobiles,
+            description: {
+              ...prevState.mobiles.description,
+              value: val,
+              valid: validate(val, prevState.mobiles.description.validationRules),
+              touched: true
+            }
+          }
+        };
+      });
+    };
+
+    mobileModelChangedHandler = val => {
+      this.setState(prevState => {
+        return {
+          mobiles: {
+            ...prevState.mobiles,
+            model: {
+              ...prevState.mobiles.model,
+              value: val,
+              valid: validate(val, prevState.mobiles.model.validationRules),
+              touched: true
+            }
+          }
+        };
+      });
+    };
+
+    mobileAddedHandler = () => {
+      if (this.state.mobiles.name.value.trim() !== ""  && this.state.mobiles.description.value.trim() !== "" && this.state.mobiles.model.value.trim() !== "") {
+        this.props.addMobile(this.state.mobiles.name.value, this.state.mobiles.description.value, this.state.mobiles.model.value);
+        ToastAndroid.show('New mobile added', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
+      } else {
         ToastAndroid.show('Please enter required fields!', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
-    }
+      }
+    };
 
-    console.log(this.props.mobiles)
-  }
-  
     render() {
-      const { mobile } = this.props;
-      let content;
-      content =
-      <View style={{ marginLeft: 20, marginRight: 20, marginTop: 10 }}>
-        <FormInput inputStyle={styles.inputFieldsForm} defaultValue={mobile.name} onChangeText={(text) => this.handleTextChange('name', text)} placeholder="Name" />
-        <FormInput inputStyle={styles.inputFieldsForm} defaultValue={mobile.description} onChangeText={(text) => this.handleTextChange('description', text)} placeholder="Description" />
-        <FormInput inputStyle={styles.inputFieldsForm} defaultValue={mobile.model} onChangeText={(text) => this.handleTextChange('model', text)} placeholder="Model" />
-        <Button
-          title="Add"
-          onPress={this.submitForm}
-        />
-    </View>
       return (
-        <View>
-          <Button
-            onPress={() => this.props.navigation.goBack()}
-            title="Go back home from Add"
-          />
-          {content}
-        </View>
+        <ScrollView>
+          <View style={styles.container}>
+            <View style={styles.mainText}>
+              <Text style={styles.textHeading}>Add mobile</Text>
+            </View>
+            <MobileInput
+              style={styles.mobileInputField}
+              mobileData={this.state.mobiles.name}
+              onChangeText={this.mobileNameChangedHandler}
+            />
+            <MobileInput
+              style={styles.mobileInputField}
+              mobileData={this.state.mobiles.description}
+              onChangeText={this.mobileDescriptionChangedHandler}
+            />
+            <MobileInput
+              style={styles.mobileInputField}
+              mobileData={this.state.mobiles.model}
+              onChangeText={this.mobileModelChangedHandler}
+            />
+            <View style={styles.button}>
+              <Button
+                title="Add mobile"
+                onPress={this.mobileAddedHandler}
+                disabled={this.state.mobiles.name.valid === false || this.state.mobiles.description.valid === false || this.state.mobiles.model.valid === false}
+              />
+            </View>
+          </View>
+        </ScrollView>
       );
     }
-  }
-mapStateToProps = (state) => {
-    return {
-      mobile: state.mobileReducer.mobile,
-      mobiles: state.mobileReducer.mobiles
-    };
   }
 
 mapDispatchToProps = (dispatch) => {
     return {
-      addMobile: (mobile) => dispatch(addMobile(mobile)),
-      setMobilePropertyInReducer: (name, value) => dispatch(setMobilePropertyInReducer(name, value)),
+      addMobile: (name, description, model) => dispatch(addMobile(name, description, model)),
+      // setMobilePropertyInReducer: (name, value) => dispatch(setMobilePropertyInReducer(name, value)),
     };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AddMobile);
+export default connect(null, mapDispatchToProps)(AddMobile);
 
 const styles = StyleSheet.create({
-  inputFieldsForm: {
-    width: 290,
-    paddingLeft: 15,
-    height: 40,
-    borderColor: "#d3d3d3",
-    borderWidth: 1,
-    borderRadius: 10,
-    marginTop: 10,
-    marginBottom: 10
-  }
+  container: {
+    flex: 1,
+    alignItems: "center"
+  },
+  textHeading: {
+    fontSize: 28,
+    fontWeight: "bold",
+  },
+  mainText: {
+    color: "black",
+    backgroundColor: "transparent",
+    padding: 5,
+    justifyContent: 'center'
+  },
+  button: {
+    margin: 8
+  },
 })

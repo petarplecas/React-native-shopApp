@@ -1,5 +1,8 @@
 import React from 'react';
-import { Button } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import Icon from 'react-native-vector-icons/Ionicons'
+import { connect } from 'react-redux';
+import { deleteMobile } from '../actions/mobileAction';
 
   class DetailsScreen extends React.Component {
     static navigationOptions = {
@@ -11,15 +14,75 @@ import { Button } from 'react-native';
       //   />
       // ),
     };
+    constructor(props) {
+      super(props);
+    }
+
+    mobileDeletedHandler = () => {
+      let mobile = this.props.navigation.getParam('mobile', 'no-id')
+      console.log(mobile.id)
+      this.props.onDeleteMobile(mobile.id);
+      this.props.navigation.goBack();
+    };
+    
+  
   
     render() {
+      const { navigation } = this.props;
+      const mobile = navigation.getParam('mobile', 'NO-ID');
       return (
-        <Button
-          onPress={() => this.props.navigation.goBack()}
-          title="Go back home"
-        />
+        <View>
+          <View>
+            <Text style={styles.mobileName} >
+              {mobile.name}
+            </Text>
+          </View>
+          <View>
+            <Text style={styles.mobileName}>
+              {mobile.description}
+            </Text>
+          </View>
+          <View>
+            <Text style={styles.mobileName}>
+              {mobile.model}
+            </Text>
+          </View>
+          <TouchableOpacity key={mobile.key} onPress={this.mobileDeletedHandler}>
+            <View style={styles.deleteButton}>
+              <Icon
+                name="ios-trash"
+                size={30}icon
+                color="red"
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
       );
     }
   }
 
-export default DetailsScreen;
+  const mapDispatchToProps = dispatch => {
+    return {
+      onDeleteMobile: key => dispatch(deleteMobile(key))
+    };
+  };
+
+  export default connect(null, mapDispatchToProps)(DetailsScreen);
+
+const styles = StyleSheet.create({
+  container: {
+    margin: 22,
+    flex: 1
+  },
+  mobileName: {
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 28
+  },
+  deleteButton: {
+    alignItems: "center"
+  },
+  subContainer: {
+    flex: 1
+  }
+});

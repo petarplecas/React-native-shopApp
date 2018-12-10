@@ -124,9 +124,9 @@ export default StyleSheet.create({
         backgroundColor: '#de2b38',
     },
     tabBar: {
-        backgroundColor: '#de2b38',
+        backgroundColor: 'rgb(110,140,54)',
         position: 'absolute',
-        height: 40,
+        height: 30,
         marginTop: -2,
         top: 0,
         left: 0,
@@ -207,5 +207,10 @@ export default StyleSheet.create({
         marginTop: 10,
         marginBottom: 20,
     },
+    listContainer:{
+        marginTop: 30,
+        marginLeft: 10,
+        marginRight: 10,
+    }
 
 })
