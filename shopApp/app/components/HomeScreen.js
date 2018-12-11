@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { FlatList, Text, TouchableOpacity, ScrollView, Image, View } from 'react-native';
 import Drawer from 'react-native-drawer';
 import Menu from '../menuScreens/Menu';
 import drawerStyles from '../assets/css/Main';
@@ -32,21 +32,26 @@ import { getMobiles } from '../actions/mobileAction';
 
     _renderItem = ({ item }) => {
       return (
-          <TouchableOpacity 
-            style={{marginBottom: 5}}
-            key={item.key} 
-            onPress={() => (
-              this.props.navigation.push('Details', {
-                mobile: item
-                })
-              )
-            }
-            title="Go to details"
-          >
-            <Text>Name: {item.name}</Text>
-            <Text>Description: {item.description}</Text>
-            <Text>model: {item.model}</Text>
-          </TouchableOpacity>
+        <TouchableOpacity 
+          style={{marginBottom: 5}}
+          key={item.key} 
+          onPress={() => (
+            this.props.navigation.push('Details', {
+              mobile: item
+              })
+            )
+          }
+          title="Go to details"
+        >
+          <View style={{ width: "100%", marginBottom: 5, padding: 10, backgroundColor: "#eee", flexDirection: "row", alignItems: "center" }} >
+            <Image 
+              resizeMode="cover" 
+              source={item.image} 
+              style={{ marginRight: 8, height: 40, width: 40}} 
+            />
+            <Text style={{ fontSize: 20 }} >{item.name}</Text>
+          </View>
+        </TouchableOpacity>
       )
     };
   
@@ -111,22 +116,3 @@ import { getMobiles } from '../actions/mobileAction';
   }
 
   export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
-
-
-// centerComponent={
-//   <View style={styles.searchHeader}>
-//       <SearchBar
-//           lightTheme
-//           showLoading
-//           icon={{ type: 'font-awesome', name: 'search', color: 'white', size: 24 }}
-//           containerStyle={styles.searchBarEl}
-//           inputStyle={{ backgroundColor: '#e24f2d' }}
-//           onChange={(event) => this.applyFilter(event.nativeEvent.text)}
-//       />
-//   </View>
-// }
-// rightComponent={<Icon
-//   name='filter-variant'
-//   type='material-community'
-//   color='white'
-// />}

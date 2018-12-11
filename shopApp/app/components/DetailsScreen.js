@@ -1,12 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import Icon from 'react-native-vector-icons/Ionicons'
 import { connect } from 'react-redux';
 import { deleteMobile } from '../actions/mobileAction';
+import { Header } from 'react-native-elements';
 
   class DetailsScreen extends React.Component {
     static navigationOptions = {
       drawerLabel: 'Notifications',
+      header: null,
       // drawerIcon: ({ tintColor }) => (
       //   <Image
       //     source={require('./notif-icon.png')}
@@ -31,31 +33,38 @@ import { deleteMobile } from '../actions/mobileAction';
       const { navigation } = this.props;
       const mobile = navigation.getParam('mobile', 'NO-ID');
       return (
+       
         <View>
+          <Header
+            leftComponent={{ icon: 'arrow-back', color: '#fff', size: 30, onPress: () => this.props.navigation.goBack(), }}
+            rightComponent={{ icon: 'delete', color: '#fff', size: 30, onPress: () => this.mobileDeletedHandler() }}
+                  
+            outerContainerStyles={{
+                backgroundColor: 'rgb(100,130,44)',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                height: 57,
+            }}
+          />
           <View>
             <Text style={styles.mobileName} >
               {mobile.name}
             </Text>
-          </View>
-          <View>
-            <Text style={styles.mobileName}>
-              {mobile.description}
-            </Text>
-          </View>
-          <View>
-            <Text style={styles.mobileName}>
-              {mobile.model}
-            </Text>
-          </View>
-          <TouchableOpacity key={mobile.key} onPress={this.mobileDeletedHandler}>
-            <View style={styles.deleteButton}>
-              <Icon
-                name="ios-trash"
-                size={30}icon
-                color="red"
+            <View style={{height: 400, width: 400, alignItems: 'center', justifyContent:'center'}}>
+              <Image
+                source={mobile.image} 
+                style={{flex:1, height: 380, width: 380}}
+                resizeMode="contain"
               />
             </View>
-          </TouchableOpacity>
+            <Text style={styles.mobileName}>
+              Description: {mobile.description}
+            </Text>
+            <Text style={styles.mobileName}>
+              Model: {mobile.model}
+            </Text>
+          </View>
         </View>
       );
     }

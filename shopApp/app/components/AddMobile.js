@@ -1,15 +1,18 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { View, StyleSheet, ToastAndroid, ScrollView, Text } from 'react-native';
+import { View, StyleSheet, ToastAndroid, ScrollView, Text, ActivityIndicator } from 'react-native';
 import { Button } from 'react-native-elements';
 import { addMobile } from '../actions/mobileAction';
+import { Header } from 'react-native-elements';
 
 import MobileInput from './TextInput/mobileInput'
 import validate from "../Utility/validation";
+import PickImage from './PickImage/PickImage'
 
   class AddMobile extends React.Component {
     static navigationOptions = {
       drawerLabel: 'AddMobile',
+      header: null,
       // drawerIcon: ({ tintColor }) => (
       //   <Image
       //     source={require('./notif-icon.png')}
@@ -20,6 +23,10 @@ import validate from "../Utility/validation";
 
     state = {
       mobiles: {
+        image: {
+          value: null,
+          valid: false
+        },
         name: {
           value: "",
           valid: false,
@@ -98,22 +105,57 @@ import validate from "../Utility/validation";
       });
     };
 
+    imagePickedHandler = image => {
+      this.setState(prevState => {
+        return {
+          mobiles: {
+            ...prevState.mobiles,
+            image: {
+              value: image,
+              valid: true
+            }
+          }
+        }
+      })
+    }
+
     mobileAddedHandler = () => {
       if (this.state.mobiles.name.value.trim() !== ""  && this.state.mobiles.description.value.trim() !== "" && this.state.mobiles.model.value.trim() !== "") {
-        this.props.addMobile(this.state.mobiles.name.value, this.state.mobiles.description.value, this.state.mobiles.model.value);
-        ToastAndroid.show('New mobile added', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
+        this.props.addMobile(this.state.mobiles.name.value, this.state.mobiles.description.value, this.state.mobiles.model.value, this.state.mobiles.image.value);
+        
       } else {
         ToastAndroid.show('Please enter required fields!', ToastAndroid.SHORT, ToastAndroid.BOTTOM);
       }
     };
 
+
+
     render() {
+      let submitButton = (
+        <Button
+          title="Add mobile"
+          onPress={this.mobileAddedHandler}
+          disabled={this.state.mobiles.name.valid === false || this.state.mobiles.description.valid === false || this.state.mobiles.model.valid === false}
+        />
+      )
+      if(this.props.isLoading) {
+        submitButton = <ActivityIndicator />
+      }
       return (
         <ScrollView>
+          <Header
+            leftComponent={{ icon: 'arrow-back', color: '#fff', size: 30, onPress: () => this.props.navigation.goBack(), }}
+            centerComponent={{text: 'Add mobile', style: {fontSize: 30, color: '#fff'}}}
+            outerContainerStyles={{
+                backgroundColor: 'rgb(100,130,44)',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                height: 57,
+            }}
+          />
           <View style={styles.container}>
-            <View style={styles.mainText}>
-              <Text style={styles.textHeading}>Add mobile</Text>
-            </View>
+            <PickImage onImagePicked={this.imagePickedHandler}/>
             <MobileInput
               style={styles.mobileInputField}
               mobileData={this.state.mobiles.name}
@@ -130,26 +172,32 @@ import validate from "../Utility/validation";
               onChangeText={this.mobileModelChangedHandler}
             />
             <View style={styles.button}>
-              <Button
+              {submitButton}
+              {/* <Button
                 title="Add mobile"
                 onPress={this.mobileAddedHandler}
                 disabled={this.state.mobiles.name.valid === false || this.state.mobiles.description.valid === false || this.state.mobiles.model.valid === false}
-              />
+              /> */}
             </View>
           </View>
         </ScrollView>
       );
     }
   }
+const mapStateToProps = state => {
+  return {
+    isLoading: state.uiReducer.isLoading
+  };
+}
 
-mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch) => {
     return {
-      addMobile: (name, description, model) => dispatch(addMobile(name, description, model)),
+      addMobile: (name, description, model, image) => dispatch(addMobile(name, description, model, image)),
       // setMobilePropertyInReducer: (name, value) => dispatch(setMobilePropertyInReducer(name, value)),
     };
 }
 
-export default connect(null, mapDispatchToProps)(AddMobile);
+export default connect(mapStateToProps, mapDispatchToProps)(AddMobile);
 
 const styles = StyleSheet.create({
   container: {

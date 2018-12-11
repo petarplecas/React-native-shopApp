@@ -1,23 +1,48 @@
+import { uiStartLoading, uiStopLoading } from './uiActions'
+
 export const Type = {
     SET_MOBILES: "SET_MOBILES",
-    REMOVE_MOBILE: "REMOVE_MOBILE"
+    REMOVE_MOBILE: "REMOVE_MOBILE",
 }
 
-export const addMobile = (name, description, model) => {
+export const addMobile = (name, description, model, image) => {
     return dispatch => {
-        const mobileData = {
-            name: name,
-            description: description,
-            model: model
-        }
-        fetch("https://shopapp-7fcf0.firebaseio.com/mobiles.json", {
+        dispatch(uiStartLoading());
+        fetch("https://us-central1-shopapp-7fcf0.cloudfunctions.net/storeImage", {
             method: "POST",
-            body: JSON.stringify(mobileData)
+            body: JSON.stringify({
+                image: image.base64
+            })
         })
-        .catch(err => console.log(err))
+        .catch(err => {
+            console.log(err);
+            alert("Something went wrong, please try again!");
+            dispatch(uiStopLoading());
+        })
         .then(res => res.json())
         .then(parsedRes => {
-            console.log(parsedRes)
+        
+            const mobileData = {
+                name: name,
+                description: description,
+                model: model,
+                image: parsedRes.imageUrl
+            };
+            
+            return fetch("https://shopapp-7fcf0.firebaseio.com/mobiles.json", {
+                method: "POST",
+                body: JSON.stringify(mobileData)
+            })
+        })
+        .catch(err => {
+            console.log(err)
+            dispatch(uiStopLoading());
+        })
+        .then(res => res.json())
+        .then(parsedRes => {
+            console.log(parsedRes);
+            alert("Something went wrong, please try again!");
+            dispatch(uiStopLoading());
         })
     };
 };
@@ -34,6 +59,9 @@ export const getMobiles = () => {
             for(let key in parsedRes) {
                 mobiles.push({
                     ...parsedRes[key],
+                    image: {
+                        uri: parsedRes[key].image
+                    },
                     id: key
                 })
             }
